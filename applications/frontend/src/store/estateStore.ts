@@ -6,45 +6,48 @@ import { ref } from 'vue'
 export const useEstateStore = defineStore('estate', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const estates = ref<any[]>([])
+  const estates = ref<Estate[]>([])
   const currentCityFilter = ref<string | null>(null)
   const searchQuery = ref('')
 
   const fetchEstates = async (city?: string, search?: string) => {
-    loading.value = true;
+    loading.value = true
+    error.value = null
     try {
-      estates.value = await getEstates({ city, search });
+      estates.value = await getEstates({ city, search })
     } catch (err) {
-      error.value = 'Ошибка загрузки данных';
+      console.error('Ошибка при загрузке данных:', err)
+      
+      error.value = err instanceof Error ? err.message : 'Ошибка загрузки данных'
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
   const filterByCity = (city: string) => {
     currentCityFilter.value = city;
     fetchEstates(city, searchQuery.value);
-  };
+  }
 
   const handleSearch = debounce(() => {
     currentCityFilter.value = null;
     fetchEstates(undefined, searchQuery.value);
-  }, 400);
+  }, 400)
 
   const clearFilters = () => {
     currentCityFilter.value = null;
     searchQuery.value = '';
     fetchEstates();
-  };
+  }
 
   const highlightSearch = (text: string) => {
-    if (!searchQuery.value) return text;
-    const regex = new RegExp(`(${searchQuery.value})`, 'gi');
-    return text.replace(
-      regex,
-      '<span style="background-color: yellow;">$1</span>'
-    );
-  };
+    if (!searchQuery.value) return text
+    const regex = new RegExp(`(${searchQuery.value})`, 'gi')
+      return text.replace(
+          regex,
+          '<span style="background-color: yellow;">$1</span>'
+      )
+  }
 
   return {
     loading,

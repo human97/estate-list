@@ -2,14 +2,11 @@
   <table>
     <thead>
       <tr>
-        <th>Адрес</th>
-        <th>Город</th>
-        <th>Тип</th>
-        <th>Цена</th>
+        <th v-for="(header, index) in head" :key="index">{{ header }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="estate in estates" :key="estate.address">
+      <tr v-for="estate in estates" :key="estate.id">
         <td v-html="highlightSearch(estate.address)"></td>
         <td>
           <button @click="filterByCity(estate.city)">&#8859;</button>
@@ -24,6 +21,7 @@
 
 <script setup lang="ts">
 interface Estate {
+  id: number;
   address: string;
   city: string;
   type: string;
@@ -31,12 +29,13 @@ interface Estate {
 }
 
 interface Props {
+  head: string[]; 
   estates: Estate[];
   highlightSearch: (text: string) => string;
   filterByCity: (city: string) => void;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 </script>
 
 <style scoped>
