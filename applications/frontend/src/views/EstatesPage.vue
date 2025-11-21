@@ -4,17 +4,15 @@ import { useEstateStore } from '@/store/estateStore'
 import { storeToRefs } from 'pinia'
 import EstateTable from '@/components/EstateTable.vue'
 import AppLoader from '@/components/UI/AppLoader.vue'
+import EstateFilter from '@/components/EstateFilter.vue'
+import { highlightSearch as highlightSearchUtil } from '@/utils/textUtils'
 
+// 1. Store
 const estateStore = useEstateStore()
-
 const { loading, error, estates, searchQuery, currentCityFilter } = storeToRefs(estateStore)
-
 const tableHeads = ['Адрес', 'Город', 'Тип', 'Цена']
 
-onMounted(() => {
-  estateStore.fetchEstates()
-})
-
+// 2. Computed
 const filteredEstates = computed(() => {
   if (!searchQuery.value || estates.value.length === 0) return estates.value
 
@@ -26,28 +24,28 @@ const filteredEstates = computed(() => {
 const isClearButtonDisabled = computed(() => {
   return !searchQuery.value && !currentCityFilter.value;
 })
+
+// 3. Methods
+const highlightSearch = (text: string) => {
+  return highlightSearchUtil(text, searchQuery.value)
+}
+
+// 4. Hooks
+onMounted(() => {
+  estateStore.fetchEstates()
+})
 </script>
 
 <template>
   <div>
     <h1>Список объектов недвижимости</h1>
 
-    <div class="search-block">
-      <input
-        class="search-input"
-        v-model="searchQuery"
-        type="text"
-        placeholder="Поиск по адресу"
-        @input="estateStore.handleSearch"
-      />
-
-      <button
-        :disabled="isClearButtonDisabled"
-        @click="estateStore.clearFilters"
-      >
-        Очистить фильтры
-      </button>
-    </div>
+    <EstateFilter
+      v-model="searchQuery"
+      :disabled="isClearButtonDisabled"
+      @clear="estateStore.clearFilters"
+      @input="estateStore.handleSearch"
+    />
 
     <AppLoader v-if="loading" /> 
 
@@ -57,7 +55,7 @@ const isClearButtonDisabled = computed(() => {
       v-else-if="estates.length > 0"
       :head="tableHeads"
       :estates="filteredEstates"
-      :highlightSearch="estateStore.highlightSearch"
+      :highlightSearch="highlightSearch"
       :filterByCity="estateStore.filterByCity"
     />
 
@@ -66,25 +64,6 @@ const isClearButtonDisabled = computed(() => {
 </template>
 
 <style scoped lang="scss">
-.search-block {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.search-input { 
-  border: 1px solid gray;
-  padding: 0 10px;
-  height: 40px;
-  border-radius: 7px;
-  font-size: 15px;
-  width: 50%;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .error-message {
   color: red;
   font-weight: bold;
