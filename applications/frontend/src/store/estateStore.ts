@@ -17,7 +17,7 @@ export const useEstateStore = defineStore('estate', () => {
       estates.value = await getEstates({ city, search })
     } catch (err) {
       console.error('Ошибка при загрузке данных:', err)
-      
+
       error.value = err instanceof Error ? err.message : 'Ошибка загрузки данных'
     } finally {
       loading.value = false
@@ -40,15 +40,6 @@ export const useEstateStore = defineStore('estate', () => {
     fetchEstates();
   }
 
-  const highlightSearch = (text: string) => {
-    if (!searchQuery.value) return text
-    const regex = new RegExp(`(${searchQuery.value})`, 'gi')
-      return text.replace(
-          regex,
-          '<span style="background-color: yellow;">$1</span>'
-      )
-  }
-
   return {
     loading,
     error,
@@ -59,6 +50,5 @@ export const useEstateStore = defineStore('estate', () => {
     filterByCity,
     handleSearch,
     clearFilters,
-    highlightSearch,
   };
 });
